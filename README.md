@@ -15,8 +15,5 @@ The current behavior of this simulation may be experimental or slightly irregula
 1. Download the `uma_monad_sphere_text.html` file.
 2. Open it in a modern web browser (e.g., Chrome, Safari, Firefox) to run the explorer locally.
 
-## License
-This project is licensed under the **MIT License**. You are free to use, modify, and redistribute the code.
-
 ## References
 - Miyauchi, H. (2026). *The UMA Monad Theory.* doi:[10.5281/zenodo.19608684](https://doi.org/10.5281/zenodo.19608684)
