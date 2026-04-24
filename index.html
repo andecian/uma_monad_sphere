@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UMA Monad Sphere Explorer v1.4</title>
+<title>UMA Monad Sphere Explorer v1.5</title>
 <style>
 :root {
   --bg: #f6f5f1;
@@ -58,12 +58,14 @@ body {
   color: var(--muted);
   line-height: 1.7;
 }
-.slider-group { margin-bottom: 1.4rem; }
-.slider-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-.slider-label .name { font-size: 13px; color: var(--muted); font-family: var(--mono); }
-.slider-label .value { font-size: 15px; font-weight: 400; font-family: var(--mono); min-width: 60px; text-align: right; }
+.slider-group { margin-bottom: 1.6rem; }
+.slider-label { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+.slider-label .name { font-size: 14px; font-weight: bold; }
+.slider-label .val-container { text-align: right; }
+.slider-label .value { font-size: 22px; font-weight: 400; font-family: var(--mono); line-height: 1.1; }
 .slider-label .value.lat { color: var(--cx-color); }
 .slider-label .value.lon { color: var(--cy-color); }
+.val-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); letter-spacing: -0.02em; margin-top: 4px; }
 input[type=range] {
   -webkit-appearance: none;
   width: 100%; height: 2px;
@@ -79,7 +81,7 @@ input[type=range]::-webkit-slider-thumb {
 }
 #px-slider::-webkit-slider-thumb { background: var(--cx-color); }
 #py-slider::-webkit-slider-thumb { background: var(--cy-color); }
-.slider-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--hint); margin-top: 3px; font-family: var(--mono); }
+.slider-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--hint); margin-top: 4px; font-family: var(--mono); }
 .out-card {
   background: var(--surface);
   border: 0.5px solid var(--border);
@@ -87,14 +89,10 @@ input[type=range]::-webkit-slider-thumb {
   padding: 1.1rem 1.25rem;
   margin-bottom: 12px;
 }
-.out-card .out-label { font-size: 11px; color: var(--hint); font-family: var(--mono); margin-bottom: 4px; }
-.out-card .out-big { font-size: 32px; font-weight: 400; font-family: var(--mono); color: var(--cz-color); letter-spacing: -0.01em; }
-.bar-wrap { margin-top: 10px; height: 4px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
+.out-card .out-label { font-size: 14px; font-weight: bold; color: var(--cz-color); margin-bottom: 6px; }
+.out-card .out-big { font-size: 32px; font-weight: 400; font-family: var(--mono); color: var(--cz-color); letter-spacing: -0.01em; line-height: 1; }
+.bar-wrap { margin-top: 12px; height: 4px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
 #presence-bar { height: 100%; width: 50%; transition: width 0.06s, background 0.06s; }
-.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
-.metric .m-label { font-size: 10px; color: var(--hint); font-family: var(--mono); margin-bottom: 3px; }
-.metric .m-val { font-size: 14px; font-family: var(--mono); }
 .verify {
   border: 0.5px solid var(--border);
   border-radius: var(--radius-sm);
@@ -132,10 +130,10 @@ canvas { display: block; width: 100%; max-width: 340px; margin: 0 auto; border-r
 <body>
 <div class="wrap">
   <header class="header">
-    <h1>UMA Monad Sphere Explorer v1.4</h1>
+    <h1>UMA Monad Sphere Explorer v1.5</h1>
 <p>Paper: https://philpapers.org/rec/MIYUMT</p>
     <p>This image is being shared for illustrative purposes.</p>
-    <p> This was created by AI(Claude), so it may be inaccurate.</p>
+    <p>This was created by AI(Claude, Gemini), so it may be inaccurate.</p>
     <p>Normalized Phase Model [-1, 1]</p>
   </header>
   <div class="layout">
@@ -147,32 +145,42 @@ Cy = cos(PhaseX · π) · sin(PhaseY · π)
 Cz = cos(PhaseX · π) · cos(PhaseY · π)
 Cx² + Cy² + Cz² = 1
       </div>
+      
       <div class="slider-group">
         <div class="slider-label">
-          <span class="name">Phase X (controls Cx)</span>
-          <span class="value lat" id="px-display">0.00</span>
+          <span class="name" style="color: var(--cx-color);">Cx (加法円)</span>
+          <div class="val-container">
+            <div class="value lat" id="cx-out">0.0000</div>
+            <div class="val-sub" id="cx-sub">(存在 —, 不在 —)</div>
+          </div>
         </div>
         <input type="range" id="px-slider" min="-1" max="1" step="0.01" value="0" />
-        <div class="slider-ends"><span>-1.0</span><span>0.0</span><span>+1.0</span></div>
+        <div class="slider-ends"><span>Phase X: -1.0</span><span>0.0</span><span>+1.0</span></div>
       </div>
+
       <div class="slider-group">
         <div class="slider-label">
-          <span class="name">Phase Y (controls Cy)</span>
-          <span class="value lon" id="py-display">0.00</span>
+          <span class="name" style="color: var(--cy-color);">Cy (乗法円)</span>
+          <div class="val-container">
+            <div class="value lon" id="cy-out">0.0000</div>
+            <div class="val-sub" id="cy-sub">(存在 —, 不在 —)</div>
+          </div>
         </div>
         <input type="range" id="py-slider" min="-1" max="1" step="0.01" value="0" />
-        <div class="slider-ends"><span>-1.0</span><span>0.0</span><span>+1.0</span></div>
+        <div class="slider-ends"><span>Phase Y: -1.0</span><span>0.0</span><span>+1.0</span></div>
       </div>
+
       <div class="out-card">
-        <div class="out-label">Cz</div>
-        <div class="out-big" id="cz-display">—</div>
+        <div class="out-label">Cz (存在円)</div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <div class="out-big" id="cz-display">—</div>
+          <div id="cz-sub" class="val-sub" style="margin-top:0;">(存在 —, 不在 —)</div>
+        </div>
         <div class="bar-wrap"><div id="presence-bar"></div></div>
       </div>
-      <div class="metrics">
-        <div class="metric"><div class="m-label">Cx</div><div class="m-val" id="cx-out">—</div></div>
-        <div class="metric"><div class="m-label">Cy</div><div class="m-val" id="cy-out">—</div></div>
-      </div>
+
       <div class="verify" id="verify-box">—</div>
+      
       <div class="presets">
         <button onclick="setPhases(0, 0)">Zero Point (0,0)</button>
         <button onclick="setPhases(0.5, 0)">PhaseX Pole (0.5,0)</button>
@@ -196,6 +204,7 @@ Cx² + Cy² + Cz² = 1
 const CV = document.getElementById('sphere');
 const ct = CV.getContext('2d');
 const W = 340, H = 340, OX = W/2, OY = H/2, RAD = 128;
+
 function proj(x3, y3, z3) {
   const ay = 32 * Math.PI / 180, ax = 22 * Math.PI / 180;
   const x1 = x3 * Math.cos(ay) + z3 * Math.sin(ay);
@@ -203,6 +212,7 @@ function proj(x3, y3, z3) {
   const y2 = y3 * Math.cos(ax) - z1 * Math.sin(ax);
   return { px: OX + x1 * RAD, py: OY - y2 * RAD };
 }
+
 function drawGreatCircle(nx, ny, nz, color, dash) {
   let ux, uy, uz;
   if (Math.abs(nx) < 0.9) { ux=0; uy=-nz; uz=ny; }
@@ -212,6 +222,7 @@ function drawGreatCircle(nx, ny, nz, color, dash) {
   const vx = ny*uz - nz*uy;
   const vy = nz*ux - nx*uz;
   const vz = nx*uy - ny*ux;
+  
   ct.beginPath();
   ct.strokeStyle = color;
   ct.lineWidth = 1.4;
@@ -225,6 +236,15 @@ function drawGreatCircle(nx, ny, nz, color, dash) {
   ct.stroke();
   ct.setLineDash([]);
 }
+
+function formatEA(val) {
+  let eVal = parseFloat(val.toFixed(2));
+  let eStr = (eVal > 0 ? '+' : '') + eVal.toFixed(2);
+  let aVal = parseFloat((-val).toFixed(2));
+  let aStr = (aVal > 0 ? '+' : '') + aVal.toFixed(2);
+  return `(存在 ${eStr}, 不在 ${aStr})`;
+}
+
 function update() {
   const px = parseFloat(document.getElementById('px-slider').value);
   const py = parseFloat(document.getElementById('py-slider').value);
@@ -233,43 +253,59 @@ function update() {
   const cx = Math.sin(lat);
   const cy = Math.cos(lat) * Math.sin(lon);
   const cz = Math.cos(lat) * Math.cos(lon);
-  document.getElementById('px-display').textContent = px.toFixed(2);
-  document.getElementById('py-display').textContent = py.toFixed(2);
+  
   document.getElementById('cx-out').textContent = cx.toFixed(4);
   document.getElementById('cy-out').textContent = cy.toFixed(4);
   document.getElementById('cz-display').textContent = cz.toFixed(4);
+
+  document.getElementById('cx-sub').textContent = formatEA(cx);
+  document.getElementById('cy-sub').textContent = formatEA(cy);
+  document.getElementById('cz-sub').textContent = formatEA(cz);
+
   const bar = document.getElementById('presence-bar');
   bar.style.width = ((cz + 1) / 2 * 100) + '%';
   bar.style.background = cz >= 0 ? '#0f8c63' : '#c94f28';
+  
   const sum = (cx*cx + cy*cy + cz*cz).toFixed(8);
   document.getElementById('verify-box').textContent = `Cx² + Cy² + Cz² = ${sum}`;
+  
   render(cx, cy, cz);
 }
+
 function render(cx, cy, cz) {
   const dark = window.matchMedia('(prefers-color-scheme:dark)').matches;
   const txClr = dark ? 'rgba(255,255,255,0.38)' : 'rgba(0,0,0,0.35)';
   const sphFill = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
   const sphStr = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
   const lineClr = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)';
+  
   ct.clearRect(0, 0, W, H);
+  
   ct.beginPath(); ct.arc(OX, OY, RAD, 0, Math.PI*2);
   ct.fillStyle = sphFill; ct.fill();
   ct.strokeStyle = sphStr; ct.lineWidth = 1; ct.stroke();
+  
   drawGreatCircle(0, 1, 0, getComputedStyle(document.documentElement).getPropertyValue('--cx-color').trim(), false);
   drawGreatCircle(1, 0, 0, getComputedStyle(document.documentElement).getPropertyValue('--cy-color').trim(), false);
   drawGreatCircle(0, 0, 1, getComputedStyle(document.documentElement).getPropertyValue('--cz-color').trim(), true);
+  
   const pP = proj(cx, cy, cz);
   const pPp = proj(-cx, -cy, -cz);
   const pC = proj(0, 0, 0);
+  
   ct.beginPath(); ct.moveTo(pP.px, pP.py); ct.lineTo(pPp.px, pPp.py);
   ct.strokeStyle = lineClr; ct.lineWidth = 0.8; ct.setLineDash([2,2]); ct.stroke();
   ct.setLineDash([]);
+  
   ct.beginPath(); ct.arc(pC.px, pC.py, 4, 0, Math.PI*2);
   ct.fillStyle = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.40)'; ct.fill();
+  
   ct.beginPath(); ct.arc(pPp.px, pPp.py, 5, 0, Math.PI*2);
   ct.fillStyle = '#1a4fa0'; ct.fill();
+  
   ct.beginPath(); ct.arc(pP.px, pP.py, 8, 0, Math.PI*2);
   ct.fillStyle = '#c94f28'; ct.fill();
+  
   ct.font = '10.5px SF Mono, Fira Code, monospace';
   ct.fillStyle = txClr;
   const labels = [
@@ -283,6 +319,7 @@ function render(cx, cy, cz) {
     ct.fillStyle = txClr; ct.fill();
     ct.fillText(t, p.px + 5, p.py - 2);
   });
+  
   ct.font = '12px Georgia, serif';
   ct.fillStyle = '#c94f28';
   ct.fillText('P', pP.px + 10, pP.py - 5);
@@ -291,13 +328,16 @@ function render(cx, cy, cz) {
   ct.fillStyle = txClr;
   ct.fillText('C', pC.px + 6, pC.py - 5);
 }
+
 function setPhases(px, py) {
   document.getElementById('px-slider').value = px;
   document.getElementById('py-slider').value = py;
   update();
 }
+
 document.getElementById('px-slider').addEventListener('input', update);
 document.getElementById('py-slider').addEventListener('input', update);
+
 update();
 </script>
 </body>
